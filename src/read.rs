@@ -2,6 +2,14 @@ use std::fs::File;
 use std::io::Read;
 use std::io::Write;
 
+
+/// 产生式结构体
+#[derive(Debug, Clone)]
+pub struct Production {
+    pub left: String,
+    pub right: Vec<String>,
+}
+
 /// 语法结构体
 ///
 /// @terminals: 终结符集合  
@@ -10,13 +18,13 @@ use std::io::Write;
 ///
 /// @rules: 产生式集合  
 ///
-/// @start: 开始符 
-#[derive(Debug)]
+/// @start: 开始符
+#[derive(Debug, Clone)]
 pub struct Grammar {
     pub terminals: Vec<String>,
     pub nonterminals: Vec<String>,
     pub start: String,
-    pub rules: Vec<(String, Vec<String>)>,
+    pub rules: Vec<Production>,
 }
 
 /// 读取文件
@@ -32,15 +40,20 @@ pub fn readfile(filename: &str) -> String {
 }
 
 /// 从命令行读取内容
+/// 返回文法串
 pub fn readcontent() -> String {
     let mut content = String::new();
-    std::io::stdin()
-        .read_line(&mut content)
-        .expect("read error");
-    return content;
+    loop {
+        if 0 == std::io::stdin().read_line(&mut content).unwrap() {
+            return content;
+        }
+    }
+    // return content;
 }
 
 /// 从命令行读取文法
+///
+/// 返回Grammar结构体
 pub fn readgrammar() -> Grammar {
     let mut input = String::new();
     print!("请输入文法非终结符个数：");
@@ -96,7 +109,7 @@ pub fn readgrammar() -> Grammar {
         for r in right {
             right_vec.push(r.to_string());
         }
-        production_vec.push((left, right_vec));
+        production_vec.push(Production{left, right: right_vec});
         input.clear();
     }
     let grammar = Grammar {
@@ -108,8 +121,14 @@ pub fn readgrammar() -> Grammar {
     return grammar;
 }
 
-
 /// 从文件中读取文法
+///
+/// ```
+/// let grammar = readgrammarfile("test.txt");
+/// ```
+/// @param filename: 文件名
+///
+/// 返回Grammar结构体
 pub fn readgrammarfile(filename: &str) -> Grammar {
     let contents = readfile(filename);
     let mut lines = contents.split("\n");
@@ -140,7 +159,7 @@ pub fn readgrammarfile(filename: &str) -> Grammar {
         for r in right {
             right_vec.push(r.trim().to_string());
         }
-        production.push((left, right_vec));
+        production.push(Production{left, right: right_vec});
     }
     let grammar = Grammar {
         terminals: terminal,
