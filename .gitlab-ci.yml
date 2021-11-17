@@ -29,8 +29,11 @@ test:cargo:
     - cargo test --workspace --verbose
 
 pages:
+  stage: doc
   script:
     - cargo doc
   artifacts:
     paths:
       - target/doc
+  dependencies:
+    - test:cargo
