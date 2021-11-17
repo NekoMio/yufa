@@ -33,7 +33,7 @@ pages:
   script:
     - cargo doc --all
     - cp -R target/doc ./crate-docs
-    - echo "<meta http-equiv=refresh content=0;url=foo/index.html>" > ./crate-docs/index.html
+    - echo "<meta http-equiv=refresh content=0;url=yufa/index.html>" > ./crate-docs/index.html
   artifacts:
     paths:
       - crate-docs
