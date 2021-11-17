@@ -4,6 +4,8 @@ use std::io::Write;
 
 use grammar_struct_lib::grammar_struct::*;
 
+use std::collections::HashSet;
+
 /// 读取文件
 /// ```
 /// let contents = readfile("test.txt");
@@ -20,6 +22,7 @@ pub fn readfile(filename: &str) -> String {
 /// 返回文法串
 pub fn readcontent() -> String {
     let mut content = String::new();
+    println!("请输入文法串：");
     loop {
         if 0 == std::io::stdin().read_line(&mut content).unwrap() {
             return content;
@@ -82,9 +85,9 @@ pub fn readgrammar() -> Grammar {
         let mut production = input.trim().split("->");
         let left = production.next().unwrap().to_string();
         let right = production.next().unwrap().split("|");
-        let mut right_vec = Vec::new();
+        let mut right_vec = HashSet::new();
         for r in right {
-            right_vec.push(r.to_string());
+            right_vec.insert(r.to_string());
         }
         production_vec.push(Production{left, right: right_vec});
         input.clear();
@@ -132,9 +135,9 @@ pub fn readgrammarfile(filename: &str) -> Grammar {
         let mut tmp = lines.next().unwrap().split("->");
         let left = tmp.next().unwrap().trim().to_string();
         let right = tmp.next().unwrap().split("|");
-        let mut right_vec = Vec::new();
+        let mut right_vec = HashSet::new();
         for r in right {
-            right_vec.push(r.trim().to_string());
+            right_vec.insert(r.trim().to_string());
         }
         production.push(Production{left, right: right_vec});
     }

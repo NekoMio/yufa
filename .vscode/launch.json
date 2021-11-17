@@ -19,7 +19,8 @@
                     "kind": "bin"
                 }
             },
-            "args": ["-g", "grammar.txt", "-i", "test.txt"],
+            // "args": [],
+            "args": ["-g", "grammar.txt", "-i", "test/test.txt"],
             "cwd": "${workspaceFolder}"
         },
         {
