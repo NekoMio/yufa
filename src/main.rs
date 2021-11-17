@@ -69,8 +69,8 @@ fn main() {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::collections::HashSet;
     use std::collections::HashMap;
+    use std::collections::HashSet;
 
     #[test]
     /// 测试文件读取
@@ -100,9 +100,18 @@ mod tests {
         assert_eq!(
             grammar.rules,
             vec![
-                Production{ left:"S".to_string(), right: rules_rights},
-                Production{ left:"A".to_string(), right: rules_righta},
-                Production{ left:"B".to_string(), right: rules_rightb},
+                Production {
+                    left: "S".to_string(),
+                    right: rules_rights
+                },
+                Production {
+                    left: "A".to_string(),
+                    right: rules_righta
+                },
+                Production {
+                    left: "B".to_string(),
+                    right: rules_rightb
+                },
             ]
         );
     }
@@ -129,9 +138,18 @@ mod tests {
         assert_eq!(
             grammar.rules,
             vec![
-                Production{ left:"S".to_string(), right: rules_rights},
-                Production{ left:"A".to_string(), right: rules_righta},
-                Production{ left:"B".to_string(), right: rules_rightb},
+                Production {
+                    left: "S".to_string(),
+                    right: rules_rights
+                },
+                Production {
+                    left: "A".to_string(),
+                    right: rules_righta
+                },
+                Production {
+                    left: "B".to_string(),
+                    right: rules_rightb
+                },
             ]
         );
     }

@@ -89,15 +89,13 @@ pub fn readgrammar() -> Grammar {
         for r in right {
             right_vec.insert(r.to_string());
         }
-        production_vec.push(Production{left, right: right_vec});
+        production_vec.push(Production {
+            left,
+            right: right_vec,
+        });
         input.clear();
     }
-    let grammar = Grammar::new(
-        terminal_vec,
-        nonterminal_vec,
-        start,
-        production_vec
-    );
+    let grammar = Grammar::new(terminal_vec, nonterminal_vec, start, production_vec);
     return grammar;
 }
 
@@ -139,13 +137,11 @@ pub fn readgrammarfile(filename: &str) -> Grammar {
         for r in right {
             right_vec.insert(r.trim().to_string());
         }
-        production.push(Production{left, right: right_vec});
+        production.push(Production {
+            left,
+            right: right_vec,
+        });
     }
-    let grammar = Grammar::new(
-        terminal,
-        nonterminal,
-        start,
-        production,
-    );
+    let grammar = Grammar::new(terminal, nonterminal, start, production);
     return grammar;
 }

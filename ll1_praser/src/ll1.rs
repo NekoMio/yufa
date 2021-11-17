@@ -1,4 +1,3 @@
-
 use grammar_struct_lib::grammar_struct::*;
 use std::collections::HashSet;
 // use read::*;
@@ -11,7 +10,6 @@ use std::collections::HashSet;
 pub fn run_ll1(contents: &str, grammar: &Grammar) -> Result<u32, String> {
     return Ok(0);
 }
-
 
 /// 尝试整理为ll1文法
 /// ```

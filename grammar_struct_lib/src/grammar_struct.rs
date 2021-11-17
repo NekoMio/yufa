@@ -184,11 +184,7 @@ impl Grammar {
     /// 返回bool
     /// true: 都是空
     /// false: 不是
-    fn all_empty(
-        &self,
-        rule: &String,
-        first_set: &HashMap<String, HashSet<String>>,
-    ) -> bool {
+    fn all_empty(&self, rule: &String, first_set: &HashMap<String, HashSet<String>>) -> bool {
         let grammar = self;
         let mut mut_rule = rule.clone();
         loop {
