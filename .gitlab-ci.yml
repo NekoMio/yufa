@@ -27,18 +27,3 @@ test:cargo:
   script:
     - rustc --version && cargo --version  # Print version info for debugging
     - cargo test --workspace --verbose
-
-pages:
-  stage: deploy
-  script:
-    - cargo doc --all
-    - cp -R target/doc ./crate-docs
-    - echo "<meta http-equiv=refresh content=0;url=yufa/index.html>" > ./crate-docs/index.html
-    - ls crate-docs/
-  artifacts:
-    paths:
-      - crate-docs
-  only:
-    - master
-  dependencies:
-    - test:cargo
