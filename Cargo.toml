@@ -7,6 +7,6 @@ edition = "2021"
 
 [dependencies]
 clap = "2.33.3"
-grammar_struct_lib = { path = "./grammar_struct_lib" }
-ll1_praser = { path = "./ll1_praser" }
-lr1_praser = { path = "./lr1_praser" }
+grammar_struct_lib = { path = "grammar_struct_lib" }
+ll1_praser = { path = "ll1_praser" }
+lr1_praser = { path = "lr1_praser" }

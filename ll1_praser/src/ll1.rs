@@ -1,7 +1,6 @@
 
 use grammar_struct_lib::grammar_struct::*;
 use std::collections::HashSet;
-use std::collections::HashMap;
 // use read::*;
 
 /// LL1 语法分析器
@@ -14,64 +13,7 @@ pub fn run_ll1(contents: &str, grammar: &Grammar) -> Result<u32, String> {
 }
 
 
-/// 求文法的FIRST集
-/// ```
-/// let first_set = get_first_set(grammar);
-/// ```
-/// 返回FIRST集
-/// HashMap<String, HashSet<String>>
-/// 
-/// key: 非终结符
-/// 
-/// value: FIRST集
-pub fn get_first_set(grammar: &Grammar) -> HashMap<String, HashSet<String>> {
-    let mut first_set: HashMap<String, HashSet<String>> = HashMap::new();
-    for rule in &grammar.rules {
-        first_set.insert(rule.left.clone(), HashSet::new());
-    }
-    let mut prev_first_set: HashMap<String, HashSet<String>> = first_set.clone();
-    loop {
-        for rule in &grammar.rules {
-            let mut first_set_of_rule: HashSet<String> = HashSet::new();
-            for symbol in rule.right.iter() {
-                if grammar.is_terminal(symbol) || grammar.is_empty(symbol) {
-                    first_set_of_rule.insert(grammar.get_terminal(symbol).unwrap().clone());
-                } else {
-                    let mut first_set_of_symbol: HashSet<String> = HashSet::new();
-                    let mut mut_symbol = symbol.clone();
-                    loop {
-                        if mut_symbol.len() == 0 {
-                            break;
-                        } else if grammar.is_terminal(&mut_symbol) || grammar.is_empty(symbol) {
-                            first_set_of_symbol.insert(grammar.get_terminal(&mut_symbol).unwrap().clone());
-                            break;
-                        } else {
-                            // println!("{} {}", mut_symbol.len(), mut_symbol);
-                            first_set_of_symbol.extend(first_set.get(&grammar.get_noterminal(&mut_symbol).unwrap()).unwrap().clone());
-                            if !first_set.get(&grammar.get_noterminal(&mut_symbol).unwrap()).unwrap().contains("~") {
-                                break;
-                            }
-                            mut_symbol = mut_symbol[grammar.get_noterminal(&mut_symbol).unwrap().len()..].trim().to_string();
-                        }
-                    }
-
-                    first_set_of_rule.extend(first_set_of_symbol);
-                }
-            }
-            first_set_of_rule.extend(first_set.get(&rule.left).unwrap().clone());
-            first_set.insert(rule.left.clone(), first_set_of_rule);
-        }
-        
-        if prev_first_set == first_set {
-            break;
-        } else {
-            prev_first_set = first_set.clone();
-        }
-    }
-    return first_set;
-}
-
-/// 消除左递归
+/// 尝试整理为ll1文法
 /// ```
 /// let grammar = format_ll(grammar).unwarp();
 /// ```
@@ -100,7 +42,7 @@ pub fn format_ll(grammar: &Grammar) -> Result<Grammar, String> {
             grammar.rules[i].right = cont.clone();
         }
     }
-    println!("{:#?}", grammar);
+    // println!("{:#?}", grammar);
     for i in 0..p {
         let left = &grammar.rules[i].left;
         // grammar.rules[i].right;

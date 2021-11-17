@@ -10,8 +10,6 @@ use lr1_praser::lr1::*;
 
 use grammar_struct_lib::grammar_struct::*;
 
-
-
 fn main() {
     let matches = App::new("yufa")
         .version("0.1")
@@ -53,8 +51,6 @@ fn main() {
     {
         let grammar = format_ll(&grammar).unwrap();
         println!("{:#?}", grammar);
-        let first_set = get_first_set(&grammar);
-        println!("{:#?}", first_set);
         let result_ll = run_ll1(&contents, &grammar);
         if let Err(error) = result_ll {
             println!("{}", error);
@@ -145,7 +141,7 @@ mod tests {
     fn test_get_first_set() {
         let grammar = readgrammarfile("test/testgrammar.txt");
         let grammar = format_ll(&grammar).unwrap();
-        let first_set = get_first_set(&grammar);
+        // let first_set = get_first_set(&grammar);
         let mut first_right_set = HashSet::new();
         first_right_set.insert("a".to_string());
         first_right_set.insert("b".to_string());
@@ -153,6 +149,19 @@ mod tests {
         first_set_ok.insert("A".to_string(), first_right_set.clone());
         first_set_ok.insert("B".to_string(), first_right_set.clone());
         first_set_ok.insert("S".to_string(), first_right_set.clone());
-        assert_eq!(first_set, first_set_ok);
+        assert_eq!(grammar.first, first_set_ok);
+    }
+    #[test]
+    /// 测试FOLLOW集
+    fn test_get_follow_set() {
+        let grammar = readgrammarfile("test/testgrammar.txt");
+        let grammar = format_ll(&grammar).unwrap();
+        let mut follow_right_set = HashSet::new();
+        follow_right_set.insert("$".to_string());
+        let mut follow_set_ok = HashMap::new();
+        follow_set_ok.insert("A".to_string(), follow_right_set.clone());
+        follow_set_ok.insert("B".to_string(), follow_right_set.clone());
+        follow_set_ok.insert("S".to_string(), follow_right_set.clone());
+        assert_eq!(grammar.follow, follow_set_ok);
     }
 }
