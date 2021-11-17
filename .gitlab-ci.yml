@@ -34,6 +34,7 @@ pages:
     - cargo doc --all
     - cp -R target/doc ./crate-docs
     - echo "<meta http-equiv=refresh content=0;url=yufa/index.html>" > ./crate-docs/index.html
+    - ls crate-docs/
   artifacts:
     paths:
       - crate-docs
