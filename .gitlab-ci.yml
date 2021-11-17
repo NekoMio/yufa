@@ -27,3 +27,10 @@ test:cargo:
   script:
     - rustc --version && cargo --version  # Print version info for debugging
     - cargo test --workspace --verbose
+
+pages:
+  script:
+    - cargo doc
+  artifacts:
+    paths:
+      - target/doc
