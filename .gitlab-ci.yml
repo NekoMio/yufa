@@ -29,7 +29,7 @@ test:cargo:
     - cargo test --workspace --verbose
 
 pages:
-  stage: doc
+  stage: deploy
   script:
     - cargo doc
   artifacts:
