@@ -31,9 +31,13 @@ test:cargo:
 pages:
   stage: deploy
   script:
-    - cargo doc
+    - cargo doc --all
+    - cp -R target/doc ./crate-docs
+    - echo "<meta http-equiv=refresh content=0;url=foo/index.html>" > ./crate-docs/index.html
   artifacts:
     paths:
-      - target/doc
+      - crate-docs
+  only:
+    - master
   dependencies:
     - test:cargo
