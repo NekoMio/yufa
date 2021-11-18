@@ -9,6 +9,7 @@ use std::collections::HashSet;
 use prettytable::{Attr, Cell, Row, Table};
 
 use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 /// 读取文件
 /// ```
@@ -83,7 +84,7 @@ pub fn readgrammar() -> Grammar {
     input.clear();
     print!("请输入文法产生式：");
     std::io::stdout().flush().unwrap();
-    let mut production_vec = Vec::new();
+    let mut production_map = BTreeMap::new();
     for _ in 0..p {
         // production_vec.push(production.next().unwrap().to_string());
         // println!("{}", i);
@@ -95,13 +96,13 @@ pub fn readgrammar() -> Grammar {
         for r in right {
             right_vec.insert(r.to_string());
         }
-        production_vec.push(Production {
+        production_map.insert(
             left,
-            right: right_vec,
-        });
+            right_vec,
+        );
         input.clear();
     }
-    let grammar = Grammar::new(terminal_vec, nonterminal_vec, start, production_vec);
+    let grammar = Grammar::new(terminal_vec, nonterminal_vec, start, production_map);
     return grammar;
 }
 
@@ -134,7 +135,7 @@ pub fn readgrammarfile(filename: &str) -> Grammar {
     // println!("{}", start);
     let p = lines.next().unwrap().trim().parse::<u32>().unwrap();
     // println!("{}", p);
-    let mut production = Vec::new();
+    let mut production = BTreeMap::new();
     for _ in 0..p {
         let mut tmp = lines.next().unwrap().split("->");
         let left = tmp.next().unwrap().trim().to_string();
@@ -143,10 +144,7 @@ pub fn readgrammarfile(filename: &str) -> Grammar {
         for r in right {
             right_vec.insert(r.trim().to_string());
         }
-        production.push(Production {
-            left,
-            right: right_vec,
-        });
+        production.insert(left, right_vec);
     }
     let grammar = Grammar::new(terminal, nonterminal, start, production);
     return grammar;

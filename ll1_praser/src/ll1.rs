@@ -1,6 +1,7 @@
 use grammar_struct_lib::grammar_struct::*;
 use std::collections::HashSet;
 use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 use prettytable::{Table};
 // use read::*;
@@ -20,8 +21,8 @@ pub fn generate_ll1_table(grammar: &Grammar) -> Result<HashMap<String, HashMap<S
         ll1_table.insert(nonterminal.clone(), HashMap::new());
     }
     for production in &grammar.rules {
-        let nonterminal = &production.left;
-        for right in &production.right {
+        let nonterminal = production.0;
+        for right in production.1 {
             let right_first_set = grammar.get_production_first_set(right);
             for right_first in &right_first_set {
                 if right_first != &"ε" {
@@ -126,35 +127,40 @@ pub fn run_ll1(contents: &str, grammar: &Grammar, ll1_table: &HashMap<String, Ha
 /// 返回format后的grammar或者错误
 pub fn format_ll(grammar: &Grammar) -> Result<Grammar, String> {
     let mut grammar = grammar.clone();
-    let p = grammar.rules.len();
-    for i in 0..p {
-        for j in 0..i {
+    let copy_rules = grammar.rules.clone();
+    for (i, (i_left, i_right)) in grammar.rules.iter_mut().enumerate() {
+        for (j, (j_left, j_right)) in copy_rules.iter().enumerate() {
+            if j >= i {
+                break;
+            }
             let mut cont = HashSet::new();
-            let left = &grammar.rules[j].left;
-            for right in &grammar.rules[i].right {
+            let left = j_left;
+            for right in i_right.iter() {
                 if right.len() >= left.len() && right[0..left.len()] == *left {
-                    for right_j in &grammar.rules[j].right {
-                        if right_j.to_string() + &right[1..] != grammar.rules[i].left {
+                    for right_j in j_right.iter() {
+                        if right_j.to_string() + &right[1..] != *i_left {
                             cont.insert((right_j.to_string() + &right[1..]).clone());
                         }
                     }
                 }
             }
-            for right in &grammar.rules[i].right {
+            for right in i_right.iter() {
                 if right.len() < left.len() || right[0..left.len()] != *left {
                     cont.insert(right.clone());
                 }
             }
-            grammar.rules[i].right = cont.clone();
+            i_right.clear();
+            i_right.extend(cont);
         }
     }
     // println!("{:#?}", grammar);
-    for i in 0..p {
-        let left = &grammar.rules[i].left;
+    let mut cont_rules = BTreeMap::new();
+    for (left, i_right) in grammar.rules.iter_mut() {
+        // let left = i_left;
         // grammar.rules[i].right;
         let mut flag = false;
         {
-            for right in &grammar.rules[i].right {
+            for right in i_right.iter() {
                 if right.len() >= left.len() && right[0..left.len()] == *left {
                     flag = true;
                     break;
@@ -168,42 +174,44 @@ pub fn format_ll(grammar: &Grammar) -> Result<Grammar, String> {
         let mut right_vecp = HashSet::new();
         let mut cont = HashSet::new();
         right_vecp.insert(String::from("ε"));
-        for right in &grammar.rules[i].right {
+        for right in i_right.iter() {
             if right.len() >= left.len() && right[0..left.len()] == *left {
                 right_vecp.insert((right[left.len()..].to_string() + &leftp).clone());
             } else {
                 cont.insert((right.to_string() + &leftp).clone());
             }
         }
-        grammar.rules[i].right = cont.clone();
-        grammar.rules.push(Production {
-            left: leftp,
-            right: right_vecp,
-        });
+        i_right.clear();
+        i_right.extend(cont);
+        cont_rules.insert(
+            leftp,
+            right_vecp,
+        );
     }
+    grammar.rules.extend(cont_rules);
     // 这里应该有个提取左公因子
 
     for rule in &grammar.rules {
-        for right in &rule.right {
-            if right.len() >= rule.left.len() && right[0..rule.left.len()] == rule.left {
-                return Err(format!("{} 消除左递归失败", rule.left));
+        for right in rule.1 {
+            if right.len() >= rule.0.len() && right[0..rule.0.len()] == *rule.0 {
+                return Err(format!("{} 消除左递归失败", rule.0));
             }
         }
-        for (i, right) in rule.right.iter().enumerate() {
-            for (j, right_j) in rule.right.iter().enumerate() {
+        for (i, right) in rule.1.iter().enumerate() {
+            for (j, right_j) in rule.1.iter().enumerate() {
                 if i == j {
                     continue;
                 }
                 if right.len() == right_j.len() && right == right_j {
-                    return Err(format!("{} 有左公因子", rule.left));
+                    return Err(format!("{} 有左公因子", rule.0));
                 }
             }
         }
     }
     let mut noterminals = grammar.nonterminals.clone();
     for rule in &grammar.rules {
-        if !noterminals.contains(&rule.left) {
-            noterminals.push(rule.left.clone());
+        if !noterminals.contains(&rule.0) {
+            noterminals.push(rule.0.clone());
         }
     }
     grammar.nonterminals = noterminals;

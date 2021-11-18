@@ -1,12 +1,6 @@
 use std::collections::HashMap;
 use std::collections::HashSet;
-
-/// 产生式结构体
-#[derive(Debug, Clone, PartialEq)]
-pub struct Production {
-    pub left: String,
-    pub right: HashSet<String>,
-}
+use std::collections::BTreeMap;
 
 /// 语法结构体
 ///
@@ -22,7 +16,8 @@ pub struct Grammar {
     pub terminals: Vec<String>,
     pub nonterminals: Vec<String>,
     pub start: String,
-    pub rules: Vec<Production>,
+    // pub rules: Vec<Production>,
+    pub rules: BTreeMap<String, HashSet<String>>,
     pub first: HashMap<String, HashSet<String>>,
     pub follow: HashMap<String, HashSet<String>>,
 }
@@ -33,7 +28,7 @@ impl Grammar {
         terminals: Vec<String>,
         nonterminals: Vec<String>,
         start: String,
-        rules: Vec<Production>,
+        rules: BTreeMap<String, HashSet<String>>,
     ) -> Grammar {
         let mut ret = Grammar {
             terminals,
@@ -127,13 +122,13 @@ impl Grammar {
         let grammar = self;
         let mut first_set: HashMap<String, HashSet<String>> = HashMap::new();
         for rule in &grammar.rules {
-            first_set.insert(rule.left.clone(), HashSet::new());
+            first_set.insert(rule.0.clone(), HashSet::new());
         }
         let mut prev_first_set: HashMap<String, HashSet<String>> = first_set.clone();
         loop {
             for rule in &grammar.rules {
                 let mut first_set_of_rule: HashSet<String> = HashSet::new();
-                for symbol in rule.right.iter() {
+                for symbol in rule.1.iter() {
                     if grammar.is_terminal(symbol) || grammar.is_empty(symbol) {
                         first_set_of_rule.insert(grammar.get_terminal(symbol).unwrap().clone());
                     } else {
@@ -171,8 +166,8 @@ impl Grammar {
                         first_set_of_rule.extend(first_set_of_symbol);
                     }
                 }
-                first_set_of_rule.extend(first_set.get(&rule.left).unwrap().clone());
-                first_set.insert(rule.left.clone(), first_set_of_rule);
+                first_set_of_rule.extend(first_set.get(rule.0).unwrap().clone());
+                first_set.insert(rule.0.clone(), first_set_of_rule);
             }
             if prev_first_set == first_set {
                 break;
@@ -283,7 +278,7 @@ impl Grammar {
         let grammar = self;
         let mut follow_set: HashMap<String, HashSet<String>> = HashMap::new();
         for rule in &grammar.rules {
-            follow_set.insert(rule.left.clone(), HashSet::new());
+            follow_set.insert(rule.0.clone(), HashSet::new());
         }
         let mut start_follow_set = HashSet::new();
         start_follow_set.insert("$".to_string());
@@ -291,7 +286,7 @@ impl Grammar {
         let mut pre_follow_set: HashMap<String, HashSet<String>> = follow_set.clone();
         loop {
             for rule in &grammar.rules {
-                for symbol in rule.right.iter() {
+                for symbol in rule.1.iter() {
                     let mut mut_symbol: String = symbol.clone();
                     loop {
                         if mut_symbol.len() == 0 || grammar.is_empty(&mut_symbol) {
@@ -307,7 +302,7 @@ impl Grammar {
                                 .trim()
                                 .to_string();
                             if next_symbol.len() == 0 {
-                                let left_follow_set = follow_set.get(&rule.left).unwrap().clone();
+                                let left_follow_set = follow_set.get(rule.0).unwrap().clone();
                                 follow_set
                                     .get_mut(&grammar.get_noterminal(&mut_symbol).unwrap())
                                     .unwrap()
@@ -315,7 +310,7 @@ impl Grammar {
                                 break;
                             }
                             if grammar.all_empty(&next_symbol, first_set) {
-                                let left_follow_set = follow_set.get(&rule.left).unwrap().clone();
+                                let left_follow_set = follow_set.get(rule.0).unwrap().clone();
                                 follow_set
                                     .get_mut(&grammar.get_noterminal(&mut_symbol).unwrap())
                                     .unwrap()
@@ -325,7 +320,7 @@ impl Grammar {
                                 follow_set
                                     .get_mut(&grammar.get_noterminal(&mut_symbol).unwrap())
                                     .unwrap()
-                                    .insert(next_symbol.clone());
+                                    .insert(grammar.get_terminal(&next_symbol).unwrap().clone());
                             }
                             if grammar.is_noterminal(&next_symbol) {
                                 // println!(
@@ -368,5 +363,18 @@ impl Grammar {
         }
 
         return follow_set;
+    }
+
+    /// 构建文法的拓广文法
+    pub fn extension(&self) -> Grammar {
+        let mut grammar = self.clone();
+        let mut pre_production = HashSet::new();
+        pre_production.insert(grammar.start.to_string());
+        grammar.rules.insert(grammar.start.to_string() + "''", pre_production);
+        grammar.start = grammar.start.to_string() + "''";
+        grammar.nonterminals.push(grammar.start.to_string() + "''");
+        grammar.first = grammar.first.clone();
+        grammar.follow = grammar.follow.clone();
+        return grammar;
     }
 }

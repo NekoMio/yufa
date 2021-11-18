@@ -2,7 +2,8 @@
 
 use clap::{App, Arg};
 
-#[macro_use] extern crate prettytable;
+#[macro_use]
+extern crate prettytable;
 mod io;
 use io::*;
 
@@ -74,9 +75,18 @@ fn main() {
     {
         // println!("{:?}", grammar);
         // println!("{}", contents);
-        let result_lr = run_lr1(&contents, &grammar);
-        if let Err(error) = result_lr {
+        let lr1_table = generate_lr1_table(&grammar);
+        if let Err(error) = lr1_table {
             println!("{}", error);
+        } else {
+            let result_lr = run_lr1(&contents, &grammar);
+            if let Err(error) = result_lr {
+                println!("{}", error);
+            } else {
+                let result_lr = result_lr.unwrap();
+                println!("分析过程为: ");
+                result_lr.printstd();
+            }
         }
     }
 }
@@ -86,6 +96,7 @@ mod tests {
     use super::*;
     use std::collections::HashMap;
     use std::collections::HashSet;
+    use std::collections::BTreeMap;
 
     #[test]
     /// 测试文件读取
@@ -112,23 +123,11 @@ mod tests {
         let mut rules_rightb = HashSet::new();
         rules_rightb.insert("b".to_string());
         rules_rightb.insert("A".to_string());
-        assert_eq!(
-            grammar.rules,
-            vec![
-                Production {
-                    left: "S".to_string(),
-                    right: rules_rights
-                },
-                Production {
-                    left: "A".to_string(),
-                    right: rules_righta
-                },
-                Production {
-                    left: "B".to_string(),
-                    right: rules_rightb
-                },
-            ]
-        );
+        let mut ok_rules = BTreeMap::new();
+        ok_rules.insert("S".to_string(), rules_rights);
+        ok_rules.insert("A".to_string(), rules_righta);
+        ok_rules.insert("B".to_string(), rules_rightb);
+        assert_eq!(grammar.rules, ok_rules);
     }
     #[test]
     /// 测试文法转化
@@ -143,30 +142,20 @@ mod tests {
         assert_eq!(grammar.start, "S".to_string());
         let mut rules_rights = HashSet::new();
         rules_rights.insert("A".to_string());
-        rules_rights.insert("B".to_string());
+        rules_rights.insert("a".to_string());
+        rules_rights.insert("b".to_string());
         let mut rules_righta = HashSet::new();
         rules_righta.insert("a".to_string());
         rules_righta.insert("B".to_string());
         let mut rules_rightb = HashSet::new();
         rules_rightb.insert("a".to_string());
         rules_rightb.insert("b".to_string());
-        assert_eq!(
-            grammar.rules,
-            vec![
-                Production {
-                    left: "S".to_string(),
-                    right: rules_rights
-                },
-                Production {
-                    left: "A".to_string(),
-                    right: rules_righta
-                },
-                Production {
-                    left: "B".to_string(),
-                    right: rules_rightb
-                },
-            ]
-        );
+
+        let mut ok_rules = BTreeMap::new();
+        ok_rules.insert("S".to_string(), rules_rights);
+        ok_rules.insert("A".to_string(), rules_righta);
+        ok_rules.insert("B".to_string(), rules_rightb);
+        assert_eq!(grammar.rules, ok_rules);
     }
 
     #[test]
