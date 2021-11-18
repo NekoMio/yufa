@@ -11,8 +11,6 @@ use lr1_praser::lr1::*;
 
 use grammar_struct_lib::grammar_struct::*;
 
-
-
 fn main() {
     let matches = App::new("yufa")
         .version("0.2")
@@ -61,10 +59,15 @@ fn main() {
         if let Err(error) = ll1_table {
             println!("{}", error);
         } else {
-            ll1_table_print(&ll1_table.unwrap(), &grammar);
-            let result_ll = run_ll1(&contents, &grammar);
+            let ll1_table = ll1_table.unwrap();
+            ll1_table_print(&ll1_table, &grammar);
+            let result_ll = run_ll1(&contents, &grammar, &ll1_table);
             if let Err(error) = result_ll {
                 println!("{}", error);
+            } else {
+                let result_ll = result_ll.unwrap();
+                println!("分析过程为: ");
+                result_ll.printstd();
             }
         }
     }
@@ -88,7 +91,7 @@ mod tests {
     /// 测试文件读取
     fn test_readfile() {
         let contents = readfile("test/test.txt");
-        assert_eq!(contents, "hello world");
+        assert_eq!(contents, "num * (num + num / (num - num))");
     }
     #[test]
     /// 从文件中读取文法

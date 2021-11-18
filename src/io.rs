@@ -231,7 +231,7 @@ pub fn ll1_table_print(table: &HashMap<String, HashMap<String, String>>, grammar
 pub fn first_set_print(grammar: &Grammar) {
     let mut first_print = Table::new();
     println!("FIRST集: ");
-    first_print.add_row(row![bFy => "非终结符", "FIRST"]);
+    first_print.set_titles(row![bFy => "非终结符", "FIRST"]);
 
     for nonterminal in &grammar.nonterminals {
         let mut first_vec = Vec::new();
@@ -248,11 +248,29 @@ pub fn first_set_print(grammar: &Grammar) {
     first_print.printstd();
 }
 
+/// 格式化输出FIRST集
+///
+/// @param grammar: 文法
+/// ```text
+/// +----------+--------------+
+/// | 非终结符 | FOLLOW       |
+/// +----------+--------------+
+/// | E        | $ )          |
+/// +----------+--------------+
+/// | T        | - $ ) +      |
+/// +----------+--------------+
+/// | F        | - / + ) * $  |
+/// +----------+--------------+
+/// | E'       | $ )          |
+/// +----------+--------------+
+/// | T'       | $ ) + -      |
+/// +----------+--------------+
+/// ```
 pub fn follow_set_print(grammar: &Grammar) {
     let mut follow_print = Table::new();
 
     println!("FOLLOW集: ");
-    follow_print.add_row(row![bFy => "非终结符", "FOLLOW"]);
+    follow_print.set_titles(row![bFy => "非终结符", "FOLLOW"]);
 
     for nonterminal in &grammar.nonterminals {
         let mut follow_vec = Vec::new();

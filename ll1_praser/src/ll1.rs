@@ -1,6 +1,8 @@
 use grammar_struct_lib::grammar_struct::*;
 use std::collections::HashSet;
 use std::collections::HashMap;
+
+use prettytable::{Table};
 // use read::*;
 
 /// 生成 LL1 文法分析表
@@ -56,11 +58,65 @@ pub fn generate_ll1_table(grammar: &Grammar) -> Result<HashMap<String, HashMap<S
 /// ```
 /// let result_ll = run_ll1(str, grammar);
 /// ```
-/// 返回运行循环次数，或者错误
-pub fn run_ll1(contents: &str, grammar: &Grammar) -> Result<u32, String> {
-
-
-    return Ok(0);
+/// 返回Table，或者错误
+pub fn run_ll1(contents: &str, grammar: &Grammar, ll1_table: &HashMap<String, HashMap<String, String>>) -> Result<Table, String> {
+    let mut stack = vec!["$".to_string(), grammar.start.to_string()];
+    let mut contents = contents.trim().to_string() + "$";
+    let mut print_table = Table::new();
+    print_table.set_titles(row![bFy => "步骤", "栈", "输入串", "动作"]);
+    let mut step = 0;
+    while contents.len() > 0 {
+        let top = stack.pop().unwrap();
+        // println!("{} {}", step, contents);
+        if grammar.is_terminal(&top) {
+            let next_symbol = grammar.get_terminal(&contents);
+            if let Err(_err) = next_symbol {
+                return Err(format!("读入文法中存在非终结符的内容，错误的符号为 {}", contents));
+            }
+            if top == next_symbol.unwrap() {
+                contents = contents.replacen(top.as_str(), "", 1).trim().to_string();
+                // println!("{} {} {} {}", step, stack.join(" "), contents, "匹配");
+                // let stach_str = ;
+                if top == "$" {
+                    print_table.add_row(row![step.to_string(), stack.join(" "), contents, "ACC接受"]);
+                } else {
+                    print_table.add_row(row![step.to_string(), stack.join(" "), contents, "匹配".to_string() + top.as_str()]);
+                }
+            } else {
+                return Err(format!("读入文法匹配失败，错误的符号为 {}", contents));
+            }
+        } else {
+            let next_symbol = grammar.get_terminal(&contents);
+            if let Err(_err) = next_symbol {
+                return Err(format!("读入文法中存在非终结符的内容，错误的符号为 {}", contents));
+            }
+            let next_symbol = next_symbol.unwrap();
+            let next_production = ll1_table.get(&top).unwrap().get(&next_symbol);
+            if let Some(production) = next_production {
+                let mut production_vec = Vec::new();
+                let mut production_str = production.to_string();
+                if !grammar.is_empty(&production_str) {
+                    while production_str.len() > 0 {
+                        if grammar.is_terminal(&production_str) {
+                            production_vec.push(grammar.get_terminal(&production_str).unwrap());
+                            production_str = production_str.replacen(grammar.get_terminal(&production_str).unwrap().as_str(), "", 1);
+                        } else {
+                            production_vec.push(grammar.get_noterminal(&production_str).unwrap());
+                            production_str = production_str.replacen(grammar.get_noterminal(&production_str).unwrap().as_str(), "", 1);
+                        }
+                    }
+                    production_vec.reverse();
+                    stack.append(&mut production_vec);
+                }
+                print_table.add_row(row![step.to_string(), stack.join(" "), contents, top + "->" + production.as_str()]);
+            } else {
+                return Err(format!("读入文法匹配失败，错误的符号为 {}", contents));
+            }
+            // contents = contents.replace(next_symbol.as_str(), "");
+        }
+        step += 1;
+    }
+    return Ok(print_table);
 }
 
 /// 尝试整理为ll1文法

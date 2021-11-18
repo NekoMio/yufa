@@ -59,12 +59,16 @@ impl Grammar {
     /// 判断字符串最左端是否为终结符
     pub fn is_terminal(&self, s: &String) -> bool {
         if self.is_empty(s) {
-            return false;
+            return true;
         }
         for t in &self.terminals {
+            // println!("{} {}", t, s);
             if s.len() >= t.len() && s[0..t.len()] == t.to_string() {
                 return true;
             }
+        }
+        if s == "$" {
+            return true;
         }
         return false;
     }
@@ -78,6 +82,9 @@ impl Grammar {
             if s.len() >= t.len() && s[0..t.len()] == t.to_string() {
                 return Ok(t.to_string());
             }
+        }
+        if s == "$" {
+            return Ok(String::from("$"));
         }
         return Err(format!("{} 的最左端不是终结符", s));
     }
