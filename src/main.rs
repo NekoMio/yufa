@@ -216,4 +216,15 @@ mod tests {
         let ll1_table = generate_ll1_table(&grammar).unwrap();
         ll1_table_print(&ll1_table, &grammar);
     }
+
+    #[test]
+    /// 测试LL1语法分析
+    fn test_run_ll1() {
+        let grammar = readgrammarfile("test/grammar.txt");
+        let grammar = format_ll(&grammar).unwrap();
+        let ll1_table = generate_ll1_table(&grammar).unwrap();
+        let input = readfile("test/test.txt");
+        let result = run_ll1(&input, &grammar, &ll1_table).unwrap();
+        result.printstd();
+    }
 }
