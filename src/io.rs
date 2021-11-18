@@ -187,13 +187,21 @@ pub fn ll1_table_print(table: &HashMap<String, HashMap<String, String>>, grammar
         row_vec.push(Cell::new(&k.to_string()).with_style(Attr::Bold));
         for terminal in &grammar.terminals {
             if let Some(value) = v.get(terminal) {
-                row_vec.push(Cell::new(&value.to_string()));
+                if value != "synch" {
+                    row_vec.push(Cell::new(&(k.to_string() + "->" + value)));
+                } else {
+                    row_vec.push(Cell::new(&value));
+                }
             } else {
                 row_vec.push(Cell::new(""));
             }
         }
         if let Some(value) = v.get("$") {
-            row_vec.push(Cell::new(&value.to_string()));
+            if value != "synch" {
+                row_vec.push(Cell::new(&(k.to_string() + "->" + value)));
+            } else {
+                row_vec.push(Cell::new(&value));
+            }
         } else {
             row_vec.push(Cell::new(""));
         }

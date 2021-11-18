@@ -24,7 +24,7 @@ pub fn generate_ll1_table(grammar: &Grammar) -> Result<HashMap<String, HashMap<S
             for right_first in &right_first_set {
                 if right_first != &"ε" {
                     if ll1_table.get(nonterminal).unwrap().get(right_first).is_none() || ll1_table.get(nonterminal).unwrap().get(right_first).unwrap() == &"synch" {
-                        ll1_table.get_mut(nonterminal).unwrap().insert(right_first.clone(), nonterminal.to_string() + "->" + right);
+                        ll1_table.get_mut(nonterminal).unwrap().insert(right_first.clone(), right.clone());
                     } else {
                         return Err(format!("{} - {} 存在冲突", nonterminal, right_first));
                     }
@@ -33,7 +33,7 @@ pub fn generate_ll1_table(grammar: &Grammar) -> Result<HashMap<String, HashMap<S
             if right_first_set.contains("ε") {
                 for follow in follow_set.get(nonterminal).unwrap() {
                     if ll1_table.get(nonterminal).unwrap().get(follow).is_none() || ll1_table.get(nonterminal).unwrap().get(follow).unwrap() == &"synch" {
-                        ll1_table.get_mut(nonterminal).unwrap().insert(follow.clone(), nonterminal.to_string() + "->" + "ε");
+                        ll1_table.get_mut(nonterminal).unwrap().insert(follow.clone(), "ε".to_string());
                     } else {
                         return Err(format!("{} - {} 存在冲突", nonterminal, follow));
                     }
