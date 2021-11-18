@@ -180,18 +180,37 @@ mod tests {
         first_set_ok.insert("B".to_string(), first_right_set.clone());
         first_set_ok.insert("S".to_string(), first_right_set.clone());
         assert_eq!(grammar.first, first_set_ok);
+        first_set_print(&grammar);
     }
     #[test]
     /// 测试FOLLOW集
     fn test_get_follow_set() {
-        let grammar = readgrammarfile("test/testgrammar.txt");
+        let grammar = readgrammarfile("test/grammar.txt");
         let grammar = format_ll(&grammar).unwrap();
         let mut follow_right_set = HashSet::new();
         follow_right_set.insert("$".to_string());
+        follow_right_set.insert(")".to_string());
         let mut follow_set_ok = HashMap::new();
-        follow_set_ok.insert("A".to_string(), follow_right_set.clone());
-        follow_set_ok.insert("B".to_string(), follow_right_set.clone());
-        follow_set_ok.insert("S".to_string(), follow_right_set.clone());
+        follow_set_ok.insert("E".to_string(), follow_right_set.clone());
+        follow_set_ok.insert("E'".to_string(), follow_right_set.clone());
+        follow_right_set.insert("+".to_string());
+        follow_right_set.insert("-".to_string());
+        follow_set_ok.insert("T".to_string(), follow_right_set.clone());
+        follow_set_ok.insert("T'".to_string(), follow_right_set.clone());
+        follow_right_set.insert("*".to_string());
+        follow_right_set.insert("/".to_string());
+        follow_set_ok.insert("F".to_string(), follow_right_set.clone());
+        follow_set_print(&grammar);
         assert_eq!(grammar.follow, follow_set_ok);
+        // follow_set_print(&grammar);
+    }
+
+    #[test]
+    /// 测试LL1分析表
+    fn test_generate_ll1_table() {
+        let grammar = readgrammarfile("test/grammar.txt");
+        let grammar = format_ll(&grammar).unwrap();
+        let ll1_table = generate_ll1_table(&grammar).unwrap();
+        ll1_table_print(&ll1_table, &grammar);
     }
 }

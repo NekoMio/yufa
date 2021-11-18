@@ -1,0 +1,9 @@
+3
+E T F
+7
++ - * / ( ) num
+E
+3
+E->E+T|E-T|T
+T->T*F|T/F|F
+F->(E)|num
