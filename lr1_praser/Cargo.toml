@@ -7,3 +7,4 @@ edition = "2021"
 
 [dependencies]
 grammar_struct_lib = { path = "../grammar_struct_lib" }
+prettytable-rs = "^0.8"
