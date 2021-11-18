@@ -6,7 +6,7 @@ use grammar_struct_lib::grammar_struct::*;
 
 use std::collections::HashSet;
 
-use prettytable::{Table, Row, Cell};
+use prettytable::{color, Attr, Cell, Row, Table};
 
 use std::collections::HashMap;
 
@@ -151,11 +151,11 @@ pub fn readgrammarfile(filename: &str) -> Grammar {
 }
 
 /// 格式化输出LL(1)文法分析表
-/// 
+///
 /// @param table: LL(1)文法分析表
-/// 
+///
 /// @param grammar: 文法
-/// 
+///
 /// ```text
 /// +----+----------+----------+----------+----------+--------+-------+--------+-------+
 /// |    | +        | -        | *        | /        | (      | )     | num    | $     |
@@ -173,19 +173,18 @@ pub fn readgrammarfile(filename: &str) -> Grammar {
 /// ```
 pub fn ll1_table_print(table: &HashMap<String, HashMap<String, String>>, grammar: &Grammar) {
     let mut table_print = Table::new();
-    
     println!("LL1 文法分析表: ");
     let mut row_vec = Vec::new();
     row_vec.push(Cell::new(""));
     for v in &grammar.terminals {
-        row_vec.push(Cell::new(&v.to_string()));
+        row_vec.push(Cell::new(&v.to_string()).with_style(Attr::Bold));
     }
-    row_vec.push(Cell::new("$"));
+    row_vec.push(Cell::new("$").with_style(Attr::Bold));
     table_print.add_row(Row::new(row_vec));
     for k in &grammar.nonterminals {
         let v = table.get(k).unwrap();
         let mut row_vec = Vec::new();
-        row_vec.push(Cell::new(&k.to_string()));
+        row_vec.push(Cell::new(&k.to_string()).with_style(Attr::Bold));
         for terminal in &grammar.terminals {
             if let Some(value) = v.get(terminal) {
                 row_vec.push(Cell::new(&value.to_string()));
@@ -204,7 +203,7 @@ pub fn ll1_table_print(table: &HashMap<String, HashMap<String, String>>, grammar
 }
 
 /// 格式化输出FIRST集
-/// 
+///
 /// @param grammar: 文法
 /// ```text
 /// +----------+--------+
@@ -223,13 +222,12 @@ pub fn ll1_table_print(table: &HashMap<String, HashMap<String, String>>, grammar
 /// ```
 pub fn first_set_print(grammar: &Grammar) {
     let mut first_print = Table::new();
-    
     println!("FIRST集: ");
-    first_print.add_row(row!["非终结符", "FIRST"]);
+    first_print.add_row(row![bFy => "非终结符", "FIRST"]);
 
     for nonterminal in &grammar.nonterminals {
         let mut first_vec = Vec::new();
-        first_vec.push(Cell::new(&nonterminal.to_string()));
+        first_vec.push(Cell::new(&nonterminal.to_string()).with_style(Attr::Bold));
         let first = grammar.first.get(nonterminal).unwrap();
         let mut first_str = String::new();
         for f in first {
@@ -239,7 +237,6 @@ pub fn first_set_print(grammar: &Grammar) {
         first_vec.push(Cell::new(&first_str));
         first_print.add_row(Row::new(first_vec));
     }
-    
     first_print.printstd();
 }
 
@@ -247,11 +244,11 @@ pub fn follow_set_print(grammar: &Grammar) {
     let mut follow_print = Table::new();
 
     println!("FOLLOW集: ");
-    follow_print.add_row(row!["非终结符", "FOLLOW"]);
+    follow_print.add_row(row![bFy => "非终结符", "FOLLOW"]);
 
     for nonterminal in &grammar.nonterminals {
         let mut follow_vec = Vec::new();
-        follow_vec.push(Cell::new(&nonterminal.to_string()));
+        follow_vec.push(Cell::new(&nonterminal.to_string()).with_style(Attr::Bold));
         let follow = grammar.follow.get(nonterminal).unwrap();
         let mut follow_str = String::new();
         for f in follow {
