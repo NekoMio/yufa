@@ -2,13 +2,16 @@
 
 use clap::{App, Arg};
 
-mod read;
-use read::*;
+#[macro_use] extern crate prettytable;
+mod io;
+use io::*;
 
 use ll1_praser::ll1::*;
 use lr1_praser::lr1::*;
 
 use grammar_struct_lib::grammar_struct::*;
+
+
 
 fn main() {
     let matches = App::new("yufa")
@@ -50,10 +53,19 @@ fn main() {
     }
     {
         let grammar = format_ll(&grammar).unwrap();
-        println!("{:#?}", grammar);
-        let result_ll = run_ll1(&contents, &grammar);
-        if let Err(error) = result_ll {
+        first_set_print(&grammar);
+        follow_set_print(&grammar);
+        // println!("{:#?}", grammar);
+        let ll1_table = generate_ll1_table(&grammar);
+        // println!("{:#?}", ll1_table);
+        if let Err(error) = ll1_table {
             println!("{}", error);
+        } else {
+            ll1_table_print(&ll1_table.unwrap(), &grammar);
+            let result_ll = run_ll1(&contents, &grammar);
+            if let Err(error) = result_ll {
+                println!("{}", error);
+            }
         }
     }
     {

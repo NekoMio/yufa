@@ -48,9 +48,9 @@ impl Grammar {
         return ret;
     }
 
-    /// 判断是否是~
+    /// 判断是否是ε
     pub fn is_empty(&self, s: &String) -> bool {
-        if s == "~" {
+        if s == "ε" {
             return true;
         }
         return false;
@@ -58,6 +58,9 @@ impl Grammar {
 
     /// 判断字符串最左端是否为终结符
     pub fn is_terminal(&self, s: &String) -> bool {
+        if self.is_empty(s) {
+            return false;
+        }
         for t in &self.terminals {
             if s.len() >= t.len() && s[0..t.len()] == t.to_string() {
                 return true;
@@ -69,7 +72,7 @@ impl Grammar {
     /// 返回字符串最左端的终结符
     pub fn get_terminal(&self, s: &String) -> Result<String, String> {
         if self.is_empty(s) {
-            return Ok(String::from("~"));
+            return Ok(String::from("ε"));
         }
         for t in &self.terminals {
             if s.len() >= t.len() && s[0..t.len()] == t.to_string() {
@@ -147,7 +150,7 @@ impl Grammar {
                                 if !first_set
                                     .get(&grammar.get_noterminal(&mut_symbol).unwrap())
                                     .unwrap()
-                                    .contains("~")
+                                    .contains("ε")
                                 {
                                     break;
                                 }
@@ -173,6 +176,53 @@ impl Grammar {
         return first_set;
     }
 
+    /// 求特定产生式的FIRST集
+    /// 
+    /// @param rule 产生式
+    /// 
+    /// @return FIRST集
+    /// 
+    /// ```
+    /// let first_set = grammar.get_production_first_set(rule);
+    /// ```
+    /// 返回FIRST集
+    /// HashSet<String>
+    pub fn get_production_first_set(&self, rule: &String) -> HashSet<String> {
+        let grammar = self;
+        let mut production_first_set: HashSet<String> = HashSet::new();
+        let mut mut_rule = rule.clone();
+        while mut_rule.len() > 0 {
+            if grammar.is_terminal(&mut_rule) || grammar.is_empty(&mut_rule) {
+                production_first_set.insert(grammar.get_terminal(&mut_rule).unwrap().clone());
+                break;
+            } else if grammar.is_noterminal(&mut_rule) {
+                production_first_set.extend(
+                    grammar
+                        .first
+                        .get(&grammar.get_noterminal(&mut_rule).unwrap())
+                        .unwrap()
+                        .clone(),
+                );
+                if !grammar
+                    .first
+                    .get(&grammar.get_noterminal(&mut_rule).unwrap())
+                    .unwrap()
+                    .contains("ε")
+                {
+                    break;
+                }
+                mut_rule = mut_rule
+                    [grammar.get_noterminal(&mut_rule).unwrap().len()..]
+                    .trim()
+                    .to_string();
+            } else {
+                // 应该不会运行到这里
+                break;
+            }
+        }
+        return production_first_set;
+    }
+
     /// 判断一个非终结符之后的所有符号的FIRST是否都是空
     ///
     /// @param first_set FIRST集
@@ -196,7 +246,7 @@ impl Grammar {
                 if first_set
                     .get(&grammar.get_noterminal(&mut_rule).unwrap())
                     .unwrap()
-                    .contains("~")
+                    .contains("ε")
                 {
                     mut_rule = mut_rule[grammar.get_noterminal(&mut_rule).unwrap().len()..]
                         .trim()
@@ -281,7 +331,7 @@ impl Grammar {
                                     .get(&grammar.get_noterminal(&next_symbol).unwrap())
                                     .unwrap()
                                     .clone();
-                                mut_first_set.retain(|x| x != "~");
+                                mut_first_set.retain(|x| x != "ε");
                                 follow_set
                                     .get_mut(&grammar.get_noterminal(&mut_symbol).unwrap())
                                     .unwrap()
@@ -289,7 +339,7 @@ impl Grammar {
                                 if !first_set
                                     .get(&grammar.get_noterminal(&next_symbol).unwrap())
                                     .unwrap()
-                                    .contains("~")
+                                    .contains("ε")
                                 {
                                     break;
                                 }

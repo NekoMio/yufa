@@ -1,6 +1,56 @@
 use grammar_struct_lib::grammar_struct::*;
 use std::collections::HashSet;
+use std::collections::HashMap;
 // use read::*;
+
+/// 生成 LL1 文法分析表
+/// 
+/// @param grammar 文法结构
+/// 
+/// @return LL1 文法分析表
+/// ```
+/// let ll1_table = ll1_table(grammar);
+/// ```
+pub fn generate_ll1_table(grammar: &Grammar) -> Result<HashMap<String, HashMap<String, String>>, String> {
+    let mut ll1_table = HashMap::new();
+    let follow_set = &grammar.follow;
+    for nonterminal in &grammar.nonterminals {
+        ll1_table.insert(nonterminal.clone(), HashMap::new());
+    }
+    for production in &grammar.rules {
+        let nonterminal = &production.left;
+        for right in &production.right {
+            let right_first_set = grammar.get_production_first_set(right);
+            for right_first in &right_first_set {
+                if right_first != &"ε" {
+                    if ll1_table.get(nonterminal).unwrap().get(right_first).is_none() || ll1_table.get(nonterminal).unwrap().get(right_first).unwrap() == &"synch" {
+                        ll1_table.get_mut(nonterminal).unwrap().insert(right_first.clone(), nonterminal.to_string() + "->" + right);
+                    } else {
+                        return Err(format!("{} - {} 存在冲突", nonterminal, right_first));
+                    }
+                }
+            }
+            if right_first_set.contains("ε") {
+                for follow in follow_set.get(nonterminal).unwrap() {
+                    if ll1_table.get(nonterminal).unwrap().get(follow).is_none() || ll1_table.get(nonterminal).unwrap().get(follow).unwrap() == &"synch" {
+                        ll1_table.get_mut(nonterminal).unwrap().insert(follow.clone(), nonterminal.to_string() + "->" + "ε");
+                    } else {
+                        return Err(format!("{} - {} 存在冲突", nonterminal, follow));
+                    }
+                }
+            } else {
+                for follow in follow_set.get(nonterminal).unwrap() {
+                    if ll1_table.get(nonterminal).unwrap().get(follow).is_none() {
+                        ll1_table.get_mut(nonterminal).unwrap().insert(follow.clone(), "synch".to_string());
+                    }
+                }
+            }
+        }
+    }   
+
+    return Ok(ll1_table);
+}
+
 
 /// LL1 语法分析器
 /// ```
@@ -8,6 +58,8 @@ use std::collections::HashSet;
 /// ```
 /// 返回运行循环次数，或者错误
 pub fn run_ll1(contents: &str, grammar: &Grammar) -> Result<u32, String> {
+
+
     return Ok(0);
 }
 
@@ -59,7 +111,7 @@ pub fn format_ll(grammar: &Grammar) -> Result<Grammar, String> {
         let leftp = left.clone() + "'";
         let mut right_vecp = HashSet::new();
         let mut cont = HashSet::new();
-        right_vecp.insert(String::from("~"));
+        right_vecp.insert(String::from("ε"));
         for right in &grammar.rules[i].right {
             if right.len() >= left.len() && right[0..left.len()] == *left {
                 right_vecp.insert((right[left.len()..].to_string() + &leftp).clone());
@@ -99,5 +151,7 @@ pub fn format_ll(grammar: &Grammar) -> Result<Grammar, String> {
         }
     }
     grammar.nonterminals = noterminals;
+    grammar.first = grammar.get_first_set();
+    grammar.follow = grammar.get_follow_set(&grammar.first);
     return Ok(grammar);
 }
