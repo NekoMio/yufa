@@ -26,13 +26,15 @@ pub fn readfile(filename: &str) -> String {
 /// 返回文法串
 pub fn readcontent() -> String {
     let mut content = String::new();
-    println!("请输入文法串：");
-    loop {
-        if 0 == std::io::stdin().read_line(&mut content).unwrap() {
-            return content;
-        }
-    }
-    // return content;
+    // println!("请输入语法串, 以Ctrl+Z结束：");
+    // loop {
+    //     if 0 == std::io::stdin().read_line(&mut content).unwrap() {
+    //         return content;
+    //     }
+    // }
+    println!("请输入语法串：");
+    std::io::stdin().read_line(&mut content).unwrap();
+    return content;
 }
 
 /// 从命令行读取文法
