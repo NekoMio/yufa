@@ -6,7 +6,7 @@ use grammar_struct_lib::grammar_struct::*;
 
 use std::collections::HashSet;
 
-use prettytable::{color, Attr, Cell, Row, Table};
+use prettytable::{Attr, Cell, Row, Table};
 
 use std::collections::HashMap;
 
