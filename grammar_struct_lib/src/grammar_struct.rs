@@ -20,6 +20,8 @@ pub struct Grammar {
     pub rules: BTreeMap<String, HashSet<String>>,
     pub first: HashMap<String, HashSet<String>>,
     pub follow: HashMap<String, HashSet<String>>,
+    pub rule_id: HashMap<(String, String), usize>,
+    pub rule_id_reverse: HashMap<usize, (String, String)>,
 }
 
 impl Grammar {
@@ -37,9 +39,19 @@ impl Grammar {
             rules,
             first: HashMap::new(),
             follow: HashMap::new(),
+            rule_id: HashMap::new(),
+            rule_id_reverse: HashMap::new(),
         };
         ret.first = ret.get_first_set();
         ret.follow = ret.get_follow_set(&ret.first);
+        let mut id = 0;
+        for rule in ret.rules.iter() {
+            for rhs in rule.1.iter() {
+                ret.rule_id.insert((rule.0.clone(), rhs.clone()), id);
+                ret.rule_id_reverse.insert(id, (rule.0.clone(), rhs.clone()));
+                id += 1;
+            }
+        }
         return ret;
     }
 
@@ -375,6 +387,36 @@ impl Grammar {
         grammar.nonterminals.push(grammar.start.to_string() + "''");
         grammar.first = grammar.first.clone();
         grammar.follow = grammar.follow.clone();
+        grammar.rule_id.clear();
+        grammar.rule_id_reverse.clear();
+        let mut id = 0;
+        for rule in grammar.rules.iter() {
+            for rhs in rule.1.iter() {
+                grammar.rule_id.insert((rule.0.clone(), rhs.clone()), id);
+                grammar.rule_id_reverse.insert(id, (rule.0.clone(), rhs.clone()));
+                id += 1;
+            }
+        }
         return grammar;
+    }
+
+    /// 根据表达式求ID
+    pub fn get_rule_id(&self, (lhs, rhs) : (&String, &String)) -> Result<usize, String> {
+        if let Some(id) = self.rule_id.get(&(lhs.to_string(), rhs.to_string())) {
+            return Ok(*id);
+        } else {
+            return Err(format!("{} -> {} not found", lhs, rhs));
+        }
+        // return self.rule_id.get(&(lhs.to_string(), rhs.to_string())).unwrap().clone();
+    }
+    
+    /// 根据ID求表达式
+    pub fn get_id_rule(&self, id: &usize) -> Result<(String, String), String> {
+        if let Some(rule) = self.rule_id_reverse.get(id) {
+            return Ok(rule.clone());
+        } else {
+            return Err(format!("id {} not found", id));
+        }
+        // return self.rule_id_reverse.get(&id).unwrap().clone();
     }
 }

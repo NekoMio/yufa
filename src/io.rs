@@ -8,8 +8,8 @@ use std::collections::HashSet;
 
 use prettytable::{Attr, Cell, Row, Table};
 
-use std::collections::HashMap;
 use std::collections::BTreeMap;
+use std::collections::HashMap;
 
 /// 读取文件
 /// ```
@@ -96,10 +96,7 @@ pub fn readgrammar() -> Grammar {
         for r in right {
             right_vec.insert(r.to_string());
         }
-        production_map.insert(
-            left,
-            right_vec,
-        );
+        production_map.insert(left, right_vec);
         input.clear();
     }
     let grammar = Grammar::new(terminal_vec, nonterminal_vec, start, production_map);
@@ -286,4 +283,53 @@ pub fn follow_set_print(grammar: &Grammar) {
     }
 
     follow_print.printstd();
+}
+
+
+pub fn lr1_table_print(table: &HashMap<usize, HashMap<String, (String, usize)>>, grammar: &Grammar) {
+    let mut table_print = Table::new();
+    let mut row_vec = Vec::new();
+    row_vec.push(Cell::new(""));
+    for v in &grammar.terminals {
+        row_vec.push(Cell::new(&v.to_string()).with_style(Attr::Bold));
+    }
+    row_vec.push(Cell::new("$").with_style(Attr::Bold));
+    row_vec.push(Cell::new(""));
+    for v in &grammar.nonterminals {
+        row_vec.push(Cell::new(&v.to_string()).with_style(Attr::Bold));
+    }
+    table_print.add_row(Row::new(row_vec));
+    for i in 0..table.len() {
+        let v = table.get(&i).unwrap();
+        let mut row_vec = Vec::new();
+        row_vec.push(Cell::new(&i.to_string()).with_style(Attr::Bold));
+        for terminal in &grammar.terminals {
+            if let Some(value) = v.get(terminal) {
+                row_vec.push(Cell::new(&(value.0.to_string() + &value.1.to_string())));
+            } else {
+                row_vec.push(Cell::new(""));
+            }
+        }
+        if let Some(value) = v.get("$") {
+            if value.0 == "ACC" {
+                row_vec.push(Cell::new(&(value.0.to_string())));
+            }
+            else {
+                row_vec.push(Cell::new(&(value.0.to_string() + &value.1.to_string())));
+            } 
+        } else {
+            row_vec.push(Cell::new(""));
+        }
+        row_vec.push(Cell::new(""));
+        for nonterminal in &grammar.nonterminals {
+            if let Some(value) = v.get(nonterminal) {
+                row_vec.push(Cell::new(&(value.0.to_string() + &value.1.to_string())));
+            } else {
+                row_vec.push(Cell::new(""));
+            }
+        }
+        table_print.add_row(Row::new(row_vec));
+    }
+    println!("LR1 文法分析表: ");
+    table_print.printstd();
 }

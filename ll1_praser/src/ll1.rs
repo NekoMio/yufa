@@ -217,5 +217,15 @@ pub fn format_ll(grammar: &Grammar) -> Result<Grammar, String> {
     grammar.nonterminals = noterminals;
     grammar.first = grammar.get_first_set();
     grammar.follow = grammar.get_follow_set(&grammar.first);
+    grammar.rule_id.clear();
+    grammar.rule_id_reverse.clear();
+    let mut id = 0;
+    for rule in grammar.rules.iter() {
+        for rhs in rule.1.iter() {
+            grammar.rule_id.insert((rule.0.clone(), rhs.clone()), id);
+            grammar.rule_id_reverse.insert(id, (rule.0.clone(), rhs.clone()));
+            id += 1;
+        }
+    }
     return Ok(grammar);
 }

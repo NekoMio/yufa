@@ -79,7 +79,9 @@ fn main() {
         if let Err(error) = lr1_table {
             println!("{}", error);
         } else {
-            let result_lr = run_lr1(&contents, &grammar);
+            let lr1_table = lr1_table.unwrap();
+            lr1_table_print(&lr1_table, &grammar);
+            let result_lr = run_lr1(&contents, &grammar, &lr1_table);
             if let Err(error) = result_lr {
                 println!("{}", error);
             } else {
@@ -94,9 +96,9 @@ fn main() {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::collections::BTreeMap;
     use std::collections::HashMap;
     use std::collections::HashSet;
-    use std::collections::BTreeMap;
 
     #[test]
     /// 测试文件读取

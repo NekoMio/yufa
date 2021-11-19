@@ -31,7 +31,13 @@ fn closure(grammar: &Grammar, kernel: Closure) -> Closure {
                         let next_symbol =
                             symbol[grammar.get_noterminal(&symbol).unwrap().len()..].to_string();
                         let mut new_symbol_vec = item.symbol.clone();
-                        new_symbol_vec.extend(grammar.get_production_first_set(&next_symbol));
+                        new_symbol_vec.extend(grammar.get_production_first_set(&next_symbol).iter().filter_map(|x| {
+                            if item.symbol.contains(x) {
+                                None
+                            } else {
+                                Some(x.clone())
+                            }
+                        }));
                         let new_item = LR1item {
                             production: SingleProduction {
                                 left: grammar.get_noterminal(&symbol).unwrap().to_string(),
@@ -40,7 +46,20 @@ fn closure(grammar: &Grammar, kernel: Closure) -> Closure {
                             dot_index: 0,
                             symbol: new_symbol_vec,
                         };
-                        closure.insert(new_item);
+                        // println!("{:?}", new_item);
+                        let mut flag = false;
+                        for v in closure.iter() {
+                            if v.production == new_item.production {
+                                flag = true;
+                                break;
+                                // continue;
+                            }
+                        }
+                        if !flag {
+                            closure.insert(new_item);
+                        }
+                        // closure.insert(new_item);
+                        // println!("{}", closure.len());
                     }
                 }
             }
@@ -68,8 +87,8 @@ fn generate_cloure_set(grammar: &Grammar) -> (Vec<Closure>, HashMap<(usize, Stri
         symbol: vec!["$".to_string()],
     });
     let start_closure = closure(&grammar, start_kernel);
-
     closure_set.push(start_closure.clone());
+    // println!("{} {:#?}", closure_set.len() - 1, start_closure);
     let mut go = HashMap::new();
     let mut index = 0;
     while index < closure_set.len() {
@@ -122,6 +141,7 @@ fn generate_cloure_set(grammar: &Grammar) -> (Vec<Closure>, HashMap<(usize, Stri
                         go.insert((index, edge.clone()), pos);
                     }
                     None => {
+                        // println!("{} {:#?}", closure_set.len(), new_closure);
                         closure_set.push(new_closure);
                         go.insert((index, edge.clone()), closure_set.len() - 1);
                     }
@@ -156,6 +176,7 @@ fn generate_cloure_set(grammar: &Grammar) -> (Vec<Closure>, HashMap<(usize, Stri
                         go.insert((index, edge.clone()), pos);
                     }
                     None => {
+                        // println!("{} {:#?}", closure_set.len(), new_closure);
                         closure_set.push(new_closure);
                         go.insert((index, edge.clone()), closure_set.len() - 1);
                     }
@@ -164,7 +185,7 @@ fn generate_cloure_set(grammar: &Grammar) -> (Vec<Closure>, HashMap<(usize, Stri
         }
         index += 1;
     }
-
+    // println!("============");
     return (closure_set, go);
 }
 
@@ -182,31 +203,63 @@ pub fn generate_lr1_table(
     let grammar = grammar.extension();
     let mut lr1_table = HashMap::new();
     let (closure_set, go) = generate_cloure_set(&grammar);
-    for i in 0..closure_set.len() - 1 {
+    for i in 0..closure_set.len() {
         lr1_table.insert(i, HashMap::new());
     }
     for (k, v) in go {
-        lr1_table.get_mut(&k.0).unwrap().insert(k.1, (
-            // closure_set[v].iter().next().unwrap().symbol[0].clone(),
-            "S".to_string(),
-            v,
-        ));
+        if grammar.is_terminal(&k.1) {
+            if lr1_table[&k.0].contains_key(&k.1) {
+                return Err(format!("{} {}", k.0, k.1));
+            }
+            lr1_table.get_mut(&k.0).unwrap().insert(k.1, (
+                // closure_set[v].iter().next().unwrap().symbol[0].clone(),
+                "S".to_string(),
+                v,
+            ));
+        } else {
+            if lr1_table[&k.0].contains_key(&k.1) {
+                return Err(format!("{} {}", k.0, k.1));
+            }
+            lr1_table.get_mut(&k.0).unwrap().insert(k.1, (
+                "".to_string(),
+                v,
+            ));
+        }
     }
     for (index, closure) in closure_set.iter().enumerate() {
+        // println!("{}", index);
         for item in closure {
             if item.dot_index == item.production.right.len() {
                 for symbol in item.symbol.iter() {
-                    // lr1_table.get_mut(&index).unwrap().insert(
-                    //     symbol.clone(),
-                    //     (
-                    //         "R".to_string(),
-                    //         grammar.get_production_id(&item.production.left, &item.production.right),
-                    //     ),
-                    // );
+                    if item.production.left == grammar.start {
+                        if lr1_table[&index].contains_key(symbol) {
+                            return Err(format!("{} {}", index, symbol));
+                        }
+                        lr1_table.get_mut(&index).unwrap().insert(
+                            symbol.clone(),
+                            (
+                                "ACC".to_string(),
+                                0,
+                            ),
+                        );
+                    } else {
+                        if lr1_table[&index].contains_key(symbol) {
+                            return Err(format!("{} {}", index, symbol));
+                        }
+                        lr1_table.get_mut(&index).unwrap().insert(
+                            symbol.clone(),
+                            (
+                                "R".to_string(),
+                                grammar.get_rule_id((&item.production.left, &item.production.right))
+                                    .unwrap(),
+                            ),
+                        );
+                    }
                 }
             }
         }
     }
+    // print!("{:#?}", lr1_table);
     return Ok(lr1_table);
 }
 
@@ -216,7 +269,8 @@ pub fn generate_lr1_table(
 /// let result_lr = run_lr1(str, grammar);
 /// ```
 /// 返回运行循环次数，或者错误
-pub fn run_lr1(contents: &str, grammar: &Grammar) -> Result<Table, String> {
+pub fn run_lr1(contents: &str, grammar: &Grammar, table: &HashMap<usize, HashMap<String, (String, usize)>>) -> Result<Table, String> {
     let print_table = Table::new();
+    
     return Ok(print_table);
 }
