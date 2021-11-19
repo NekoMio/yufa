@@ -218,4 +218,12 @@ mod tests {
         let result = run_ll1(&input, &grammar, &ll1_table).unwrap();
         result.printstd();
     }
+
+    #[test]
+    /// 测试LR1分析表
+    fn test_generate_lr1_table() {
+        let grammar = readgrammarfile("test/grammar.txt");
+        let lr1_table = generate_lr1_table(&grammar).unwrap();
+        lr1_table_print(&lr1_table, &grammar);
+    }
 }
