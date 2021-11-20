@@ -67,14 +67,16 @@ fn main() {
                 println!("{}", error);
             } else {
                 let result_ll = result_ll.unwrap();
-                println!("分析过程为: ");
+                println!("LL1 分析过程为: ");
                 result_ll.printstd();
             }
         }
     }
     {
+        println!("\n\n");
         // println!("{:?}", grammar);
         // println!("{}", contents);
+        let grammar = grammar.extension();
         let lr1_table = generate_lr1_table(&grammar);
         if let Err(error) = lr1_table {
             println!("{}", error);
@@ -86,7 +88,7 @@ fn main() {
                 println!("{}", error);
             } else {
                 let result_lr = result_lr.unwrap();
-                println!("分析过程为: ");
+                println!("LR1 分析过程为: ");
                 result_lr.printstd();
             }
         }
@@ -225,5 +227,16 @@ mod tests {
         let grammar = readgrammarfile("test/grammar.txt");
         let lr1_table = generate_lr1_table(&grammar).unwrap();
         lr1_table_print(&lr1_table, &grammar);
+    }
+
+    #[test]
+    /// 测试LR1语法分析
+    fn test_run_lr1() {
+        let grammar = readgrammarfile("test/grammar.txt");
+        let grammar = grammar.extension();
+        let lr1_table = generate_lr1_table(&grammar).unwrap();
+        let input = readfile("test/test.txt");
+        let result = run_lr1(&input, &grammar, &lr1_table).unwrap();
+        result.printstd();
     }
 }
