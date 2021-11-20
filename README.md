@@ -3,7 +3,7 @@
 NekoMio <hui@nekomio.com>
 
 - [x] LL1 文法分析
-- [ ] LR1 文法分析
+- [x] LR1 文法分析
 
 ### 运行
 ```bash

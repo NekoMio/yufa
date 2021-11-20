@@ -14,7 +14,7 @@ use grammar_struct_lib::grammar_struct::*;
 
 fn main() {
     let matches = App::new("yufa")
-        .version("0.3")
+        .version("0.4")
         .author("Nekomio <hui@nekomio.com>")
         .about("LL1 & LR1 语法分析器")
         .arg(
