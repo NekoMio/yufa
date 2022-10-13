@@ -121,7 +121,7 @@ pub fn readgrammarfile(filename: &str) -> Grammar {
     for _ in 0..m {
         nonterminal.push(nonterminal_line.next().unwrap().trim().to_string());
     }
-    let n = lines.next().unwrap().parse::<u32>().unwrap();
+    let n = lines.next().unwrap().trim().parse::<u32>().unwrap();
     // println!("{}", n);
     let mut terminal = Vec::new();
     let mut terminal_line = lines.next().unwrap().trim().split_whitespace();
